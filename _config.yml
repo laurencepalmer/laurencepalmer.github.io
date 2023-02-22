@@ -24,15 +24,15 @@ description: >- # this means to ignore newlines until "baseurl:"
   A little page to host projects and such
 baseurl: "" # the subpath of your site, e.g. /blog
 url: "" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: notaburneraccount
 github_username: laurencepalmer
+linkedin_username: laurence-palmer-0ba696104
 
 # Build settings
 theme: minima
 plugins:
   - jekyll-feed
 
-markdown: redcarpet
+#markdown: redcarpet
 
 # Exclude from processing.
 # The following items will not be processed, by default.
