@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Draft Scraper"
+title:  "NFL Draft Scraper"
 date:   2023-02-21 01:08:51 +0000
 categories: jekyll update
 ---
