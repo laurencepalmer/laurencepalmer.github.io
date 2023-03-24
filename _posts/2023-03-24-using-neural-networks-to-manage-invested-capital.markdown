@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Using Neural Networks to Manage Invested Capital"
+title:  "Using Neural Networks to Help Manage Invested Capital"
 date:   2023-03-24 01:08:51 +0000
 categories: jekyll update
 ---
@@ -15,10 +15,62 @@ The pension fund is now posed with a problem: What to do with the committed capi
 
 This is where our project fills in the gap.  Our group built and tested a whole suite of models to try and predict the amounts of capital calls based on historical data.  Originally, we spent our time trying to find correlations between market data, like S&P500 levels, and capital calls.  Long story short, that didn't pan out and we were forced to pivot to a different idea.  We still managed to get some decent models, and I'll be focusing on those that I coded and created.    
 
-### Models and Data
+### Data and Cleaning
 
-The main investment fund data was sourced from [Idaho's Pension fund](https://www.persi.idaho.gov/investments/).  In addition, I used a perturbed sine wave to ensure that the models were working as intended.  All of the models I coded were in PyTorch, and for the Idaho data, they were trained on an MSI running Ubuntu 22.04 with a GeForce RTX 3060.  
+The main investment fund data was sourced from [Idaho's Pension fund](https://www.persi.idaho.gov/investments/).  In addition, I used a perturbed sine wave to ensure that the models were working as intended.  
 
 First, here's a look at the data for one of the funds that the Idaho Pension fund keeps money with: 
-<img src="/assets/img/Figure1.png">
-The Idaho data had the fields graphed above, for 138 unique funds.  Many of these funds had data spanning across 91 quarters but others did not.  
+<img src="/assets/img/capstone_post/Figure1.png">
+The Idaho data had the fields graphed above, for 138 unique funds.  Some of these funds had data spanning across 91 quarters but others did not.  In the instance above, there were 43 quarters worth of data on Chisholm Partners IV.  The data was originally organized into excel files released quarterly, and our team aggregated everything into one source.  In total, we had 4332 quarters worth of data across the 138 funds.  
+
+It's apparent that the numbers that we're dealing with are massive (except for the rates), so prior to feeding anything into my models, I performed a [MinMax scaling](https://towardsdatascience.com/everything-you-need-to-know-about-min-max-normalization-in-python-b79592732b79#:~:text=Variables%20that%20are%20measured%20at,used%20prior%20to%20model%20fitting.) to get everything between [0,1].  I decided this was the most appropriate scaling since it was the simplest, most conceptually simple method for this data.  Nothing was normally distributed, so Z-scaling felt forced, and unit length scaling would've been too complicated.  This was one of the regularization techniques I used, but the only one not implemented in training or model architecture. 
+
+### The Models 
+All of the models I coded were in PyTorch, and for the Idaho data, they were trained on an MSI running Ubuntu 22.04 with a GeForce RTX 3060.  I tried to have one simple model and another more complex one and compare the two.  
+
+#### Simple MLP
+The simplest NN model I could built for this problem was just an MLP.  I tried to write the code so that I could add dropouts, bias, layers, etc. at will, which will help further down the line when I attempt to optimize the models with something like a 5/10 fold cross validation.  
+
+{% highlight python %}
+class GeneralNN(nn.Module):
+    """
+    General, modular MLP
+
+    adds relu after every hidden layer
+
+    params
+    --------
+    input_len:: size of the input, i.e. number of nodes in input layer
+    output_len:: size of output
+    hidden_dim:: gives number of hidden layers (len(hidden_dim)) and the dimensions in each
+    dropout:: adds dropout after every hidden layer if its nonzero 
+    bias:: add bias term or not
+    """
+    def __init__(self, input_len: int, output_len: int, hidden_dim: List[int], dropout: float = 0, bias = True):
+        super().__init__()
+
+        self.input_len = input_len
+        self.output_len = output_len
+        if hidden_dim: # check if there's anything in hidden_dim
+            layers = [nn.Linear(input_len, hidden_dim[0], bias = bias)]
+
+            for i, hidden in enumerate(hidden_dim[:-1]):
+                layer = [nn.Linear(hidden, hidden_dim[i+1], bias = bias), nn.ReLU()]
+                if dropout:
+                    layer.append(nn.Dropout(dropout))
+                layers += layer
+
+            layers += [nn.Linear(hidden_dim[-1], output_len, bias = bias)]
+        else:
+            layers = [nn.Linear(input_len, output_len, bias = bias)]
+
+        self.main = nn.Sequential(*layers)
+
+    def forward(self, X):
+        output = self.main(X)
+        return output
+
+{% endhighlight %}
+
+The initial architecture I used was 
+

@@ -6,4 +6,3 @@ layout: home
 permalink: /
 ---
 Hi, welcome to my page!  From time to time, I'll post some projects or code.  
-<!-- ![Me next to Gen. Sherman](/assets/img/home.HEIC) -->
