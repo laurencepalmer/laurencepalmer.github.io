@@ -11,9 +11,9 @@ First, a little bit of background about the topic itself.  You may know somethin
 
 Because these institutional investors are committing tons of money, the PE/VC firms don't expect them to pay the full amount up front.  From time to time, they will send a [capital call or drawdown](https://carta.com/blog/capital-call/) which gives their limited partners (the investors in the fund) notice of a potential deal and instructions to wire some amount of their share so the general partner (usually the PE/VC firm) can make the transaction.  The opposite of a capital call is a capital distribution.  
 
-The pension fund is now posed with a problem: What to do with the committed capital?  If they just hold the total amount of their commitment in cash, then they'll be missing out on returns.  If they invest too much of their committed capital and can't come up with the cash when a capital call comes, then they'll be subject to some penalty specified by the fund terms.  A potentially lucrative deal could even fall through.  
+The pension fund is now posed with a problem: What to do with the committed capital?  If they just hold the total amount of their commitment in cash, then they'll be missing out on returns and suppressing their IRR.  If they invest too much of their committed capital and can't come up with the cash when a capital call comes, then they'll be subject to some penalty specified by the fund terms.  A potentially lucrative deal could even fall through.  
 
-This is where our project fills in the gap.  Our group built and tested a whole suite of models to try and predict the amounts of capital calls based on historical data.  Originally, we spent our time trying to find correlations between market data, like S&P500 levels, and capital calls.  Long story short, that didn't pan out and we were forced to pivot to a different idea.  We still managed to get some decent models, and I'll be focusing on those that I coded and created.    
+This is where our project fills in a gap.  Our group built and tested a suite of models to try and predict the amounts of capital calls based on historical data.  Originally, we spent our time trying to find correlations between market data, like S&P500 levels, and capital calls.  Long story short, that didn't pan out, and we were forced to pivot to a different idea.  We still managed to get some decent models, and I'll be focusing on those that I coded and created.    
 
 ### Data and Cleaning
 
@@ -23,13 +23,108 @@ First, here's a look at the data for one of the funds that the Idaho Pension fun
 <img src="/assets/img/capstone_post/Figure1.png">
 The Idaho data had the fields graphed above, for 138 unique funds.  Some of these funds had data spanning across 91 quarters but others did not.  In the instance above, there were 43 quarters worth of data on Chisholm Partners IV.  The data was originally organized into excel files released quarterly, and our team aggregated everything into one source.  In total, we had 4332 quarters worth of data across the 138 funds.  
 
-It's apparent that the numbers that we're dealing with are massive (except for the rates), so prior to feeding anything into my models, I performed a [MinMax scaling](https://towardsdatascience.com/everything-you-need-to-know-about-min-max-normalization-in-python-b79592732b79#:~:text=Variables%20that%20are%20measured%20at,used%20prior%20to%20model%20fitting.) to get everything between [0,1].  I decided this was the most appropriate scaling since it was the simplest, most conceptually simple method for this data.  Nothing was normally distributed, so Z-scaling felt forced, and unit length scaling would've been too complicated.  This was one of the regularization techniques I used, but the only one not implemented in training or model architecture. 
+It's apparent that the numbers that we're dealing with are massive (except for the rates), so prior to feeding anything into my models, I performed a [MinMax scaling](https://towardsdatascience.com/everything-you-need-to-know-about-min-max-normalization-in-python-b79592732b79#:~:text=Variables%20that%20are%20measured%20at,used%20prior%20to%20model%20fitting.) to get everything between [0,1].  I decided this was the most appropriate scaling since it was the simplest for this data.  Nothing was normally distributed, so Z-scaling felt forced, and unit length scaling would've been too complicated.  This was one of the handful of regularization techniques. 
+
+To ensure that the models were working as expected, I used a perturbed sine wave as a first test.  
 
 ### The Models 
-All of the models I coded were in PyTorch, and for the Idaho data, they were trained on an MSI running Ubuntu 22.04 with a GeForce RTX 3060.  I tried to have one simple model and another more complex one and compare the two.  
+All of the models I coded were in PyTorch, and for the Idaho data, they were trained on an MSI running Ubuntu 22.04 with a GeForce RTX 3060.  I tried to have one simple and one complex model to compare.   
+
+#### Inputs 
+Inputs to the models were fed in sequences of 4, fund by fund.  The predictors for the Idaho data was lagged capital calls. Essentially, the model was fed the previous 4 quarters worth of capital calls and asked to predict the value in the next quarter. The sequences were length 4 so the model could pick up the seasonality within the data over a year (4 quarters).  Since the MLP doesn't have a recurrent structure, the sequence was flattened and then fed into the model.   In addition, padding was added so that if the batch number loaded from the dataset was less than the window size of 4 then repeated values were added as padding.  For example, for batch i = 3 for the Idaho data, the models were given 
+
+{% highlight python %}
+[tensor([[[0.0455],
+         [0.0455],
+         [0.0675],
+         [0.0879]]]), tensor([0.0895])]
+{% endhighlight %}
+where 0.0455, the first value of Paid In Capital, is repeated twice to pad the input sequence and 0.0895 is the target value. 
+
+
+For the perturbed sine wave test, the models were provided with the x values and previous (lagged) values of the perturbed sine wave.  I used the following customized data sets to feed the models.  I utilized the `SequenceData` structure found at [this resource](https://www.crosstab.io/articles/time-series-pytorch-lstm/#data) and then utilized it to construct the Idaho data set so that the data did not overlap across funds. 
+
+{% highlight python %}
+
+class SequenceData(Dataset):
+    """
+    Class for easily loading sequential data
+    """
+
+    def __init__(self, y_col: str, x_col: List[str], window: int, data_path: str = None, df_arg: pd.DataFrame = None):
+        """
+        params
+        ------
+        y_col:: target column(s)
+        x_col:: predictors
+        window:: how long each subsequence is
+        data_path:: where data lives
+
+        """
+        if data_path:
+            df = pd.read_csv(data_path)
+        else:
+            df = df_arg
+
+        self.features = x_col
+        self.target = y_col
+        self.window = window
+        self.y = torch.tensor(df[y_col].values).float()
+        self.X = torch.tensor(df[x_col].values).float()
+
+    def __len__(self):
+        return self.X.shape[0]
+
+    def __getitem__(self, i): 
+        if i >= self.window - 1:
+            i_start = i - self.window + 1
+            x = self.X[i_start:(i + 1), :]
+        else:
+            padding = self.X[0].repeat(self.window - i - 1, 1)
+            x = self.X[0:(i + 1), :]
+            x = torch.cat((padding, x), 0)
+
+        return x, self.y[i]
+
+class IdahoData(Dataset):
+    """
+    Class for loading the Idaho Dataset
+    """
+    
+    def __init__(self, y_col: str, x_col: str, window: int, data_path: str):
+        """
+        Same as Sequence Data
+        """
+        self.y_col = y_col
+        self.x_col = x_col
+        self.window = window
+        self.X = []
+        self.y = []
+        df = pd.read_csv(data_path)
+
+        fund_names = df["Investment Name"].unique()
+
+        for fund in fund_names:
+            fund_spec_data = df[df["Investment Name"] == fund].copy()
+            name = f"shifted_{y_col}"
+            shifted_y = fund_spec_data[y_col].shift(1)
+            fund_spec_data[name] = shifted_y
+            fund_sequence = SequenceData(y_col, x_col + [name], window, data_path = None, df_arg = fund_spec_data[1:])
+            for j in range(len(fund_sequence)):
+                X, y = fund_sequence.__getitem__(j)
+                self.X.append(X)
+                self.y.append(y)
+            
+    def __len__(self):
+        return len(self.X)
+
+    def __getitem__(self, i):
+        return self.X[i], self.y[i]
+
+{% endhighlight %}
 
 #### Simple MLP
-The simplest NN model I could built for this problem was just an MLP.  I tried to write the code so that I could add dropouts, bias, layers, etc. at will, which will help further down the line when I attempt to optimize the models with something like a 5/10 fold cross validation.  
+The simplest NN model I could built for this problem was just an MLP.  I tried to write the code so that I could add dropouts, bias, layers, etc. at will, which will help further down the line with 5/10 fold cross validations to find the best hyperparameters.
 
 {% highlight python %}
 class GeneralNN(nn.Module):
@@ -72,5 +167,61 @@ class GeneralNN(nn.Module):
 
 {% endhighlight %}
 
-The initial architecture I used was 
+The initial architecture I used was just 1 fully connected hidden layer with 32 nodes, initialized with 
+
+{% highlight python %}
+input_len = len(torch.flatten(X))
+output_len = 1
+hidden_dim = [32, 32, 32]
+bias = True
+dropout = 0.2
+epochs = 50
+early_stop_val = 1
+
+model = GeneralNN(input_len, output_len, hidden_dim, dropout, bias).to(device)
+{% endhighlight %}
+
+#### LSTM RNN
+For the more complex model, I decided to use a stacked, LSTM RNN.  We did not have a large amount of data and this architecture is decent at capturing "seasonal" patterns demonstrated by its use in NLP applications.  This implementation of the LSTM just doesn't have an embedding layer.  The following code is how I implemented it 
+
+{% highlight python %}
+class LSTM(nn.Module):
+
+    def __init__(self, num_hidden, num_features, out_features, num_layers, dropout, batch_first = True):
+        super().__init__()
+        self.num_sensors = num_features
+        self.num_hidden = num_hidden
+        self.out_features = out_features
+        self.num_layers = num_layers
+
+        self.lstm = nn.LSTM(input_size = num_features, hidden_size = num_hidden, batch_first = batch_first, num_layers = num_layers, dropout = dropout)
+        self.linear = nn.Linear(in_features = self.num_hidden, out_features = out_features)
+
+    def forward(self, X):
+        batch_size = X.shape[0]
+        h0 = torch.zeros(self.num_layers, batch_size, self.num_hidden).requires_grad_().to(device)
+        c0 = torch.zeros(self.num_layers, batch_size, self.num_hidden).requires_grad_().to(device)
+
+        out, (hn,cn) = self.lstm(X, (h0, c0))
+        output = self.linear(hn[0]).flatten()
+
+        return output
+
+{% endhighlight %}
+As you can see, I take the the last hidden state of the LSTM model and run that through the linear output layer to get to the number of time steps I want to predict given by `out_features`.  
+
+{% highlight python %}
+num_features = len(x_cols)
+out_features = 1
+
+num_layers = 2
+num_hidden = 32
+epochs = 2000
+dropout = 0.2
+early_stop_val = 1
+
+model1 = LSTM2(num_hidden, num_features, out_features, num_layers, dropout)
+{% endhighlight %}
+
+
 
