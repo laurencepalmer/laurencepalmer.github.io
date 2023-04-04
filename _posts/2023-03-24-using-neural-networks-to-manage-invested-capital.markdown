@@ -4,7 +4,7 @@ title:  "Using Neural Networks to Help Manage Invested Capital"
 date:   2023-03-24 01:08:51 +0000
 categories: jekyll update
 ---
-Since September 2022, I've been working on a capstone project for my Master's degree along with some team members.  As the school year wraps up, I figured this would be a good time to summarize the progress that has been made up to this point.  In this post, I'll be focusing on providing a bit of background for the project and highlighting some of the models that I built for the project. 
+I've been working on a capstone project for my Master's degree along with some team members.  As the school year wraps up, I figured this would be a good time to summarize the progress that has been made up to this point.  In this post, I'll be focusing on providing a bit of background for the project and highlighting some of the models that I built for the project.  There are a few more steps before the project is done, which I'll mention in this post as well.  
 
 ### Background
 First, a little bit of background about the topic itself.  You may know something about pension funds or you might be a pensioner yourself.  Pension funds essentially take money, in lump sum payments or over time, and distribute it to retirees who've met the requirements to receive a distribution.  The pension funds don't just hold onto the money they have in cash.  More recently, they have been committing some portion of it to [private equity or venture capital firms](https://www.investopedia.com/articles/investing-strategy/090916/how-do-pension-funds-work.asp) who invest the money on their behalf and distribute profits, just like the pension funds to pensioners.  The same thing occurs at sovereign wealth funds and other institutional investment funds. 
@@ -13,7 +13,7 @@ Because these institutional investors are committing tons of money, the PE/VC fi
 
 The pension fund is now posed with a problem: What to do with the committed capital?  If they just hold the total amount of their commitment in cash, then they'll be missing out on returns and suppressing their IRR.  If they invest too much of their committed capital and can't come up with the cash when a capital call comes, then they'll be subject to some penalty specified by the fund terms.  A potentially lucrative deal could even fall through.  
 
-This is where our project fills in a gap.  Our group built and tested a suite of models to try and predict the amounts of capital calls based on historical data.  Originally, we spent our time trying to find correlations between market data, like S&P500 levels, and capital calls.  Long story short, that didn't pan out, and we were forced to pivot to a different idea.  We still managed to get some decent models, and I'll be focusing on those that I coded and created.    
+This is where our project fills in a gap.  Our group built and tested a suite of models to try and predict the amounts of capital calls based on historical data.  Originally, we spent our time trying to find correlations between market data, like S&P500 levels, and capital calls.  Long story short, that didn't pan out, and we were forced to pivot to a different idea.  We still managed to get some decent models, and I'll be focusing on those that I created.    
 
 ### Data and Cleaning
 
@@ -28,7 +28,7 @@ It's apparent that the numbers that we're dealing with are massive (except for t
 To ensure that the models were working as expected, I used a perturbed sine wave as a first test.  
 
 ### The Models 
-All of the models I coded were in PyTorch, and for the Idaho data, they were trained on an MSI running Ubuntu 22.04 with a GeForce RTX 3060.  I tried to have one simple and one complex model to compare.   
+All of the models I coded were in PyTorch, and for the Idaho data, they were trained on an MSI running Ubuntu 22.04 with a GeForce RTX 3060. I created two different models, one simple and one more complex.  
 
 #### Inputs 
 Inputs to the models were fed in sequences of 4, fund by fund.  The predictors for the Idaho data was lagged capital calls. Essentially, the model was fed the previous 4 quarters worth of capital calls and asked to predict the value in the next quarter. The sequences were length 4 so the model could pick up the seasonality within the data over a year (4 quarters).  Since the MLP doesn't have a recurrent structure, the sequence was flattened and then fed into the model.   In addition, padding was added so that if the batch number loaded from the dataset was less than the window size of 4 then repeated values were added as padding.  For example, for batch i = 3 for the Idaho data, the models were given 
@@ -175,14 +175,12 @@ output_len = 1
 hidden_dim = [32, 32, 32]
 bias = True
 dropout = 0.2
-epochs = 50
-early_stop_val = 1
 
 model = GeneralNN(input_len, output_len, hidden_dim, dropout, bias).to(device)
 {% endhighlight %}
 
 #### LSTM RNN
-For the more complex model, I decided to use a stacked, LSTM RNN.  We did not have a large amount of data and this architecture is decent at capturing "seasonal" patterns demonstrated by its use in NLP applications.  This implementation of the LSTM just doesn't have an embedding layer.  The following code is how I implemented it 
+I decided to also use a stacked, LSTM RNN.  We did not have a large amount of data and this architecture can capture "seasonal" patterns demonstrated by its use in NLP applications.  This implementation of the model just doesn't have an embedding layer since I'm not training on text.  The following code is how I implemented it 
 
 {% highlight python %}
 class LSTM(nn.Module):
@@ -208,20 +206,106 @@ class LSTM(nn.Module):
         return output
 
 {% endhighlight %}
-As you can see, I take the the last hidden state of the LSTM model and run that through the linear output layer to get to the number of time steps I want to predict given by `out_features`.  
+As you can see, I take the the last hidden state of the LSTM model and run that through the linear output layer to get to the number of time points predicted given by `out_features`.  I chose to have 32 features in the hidden state and a dropout rate of 0.2, similar to the simple MLP.  
 
 {% highlight python %}
-num_features = len(x_cols)
+num_features = len(x_cols) + 1
 out_features = 1
 
 num_layers = 2
 num_hidden = 32
-epochs = 2000
 dropout = 0.2
-early_stop_val = 1
 
-model1 = LSTM2(num_hidden, num_features, out_features, num_layers, dropout)
+model1 = LSTM(num_hidden, num_features, out_features, num_layers, dropout)
+{% endhighlight %}
+To read more about this implementation, I recommend taking a look at the docs [here](https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html).  
+
+#### Optimizers and Loss
+I used the following optimizer and loss function for both models.  `model1` refers to the LSTM model. 
+{% highlight python %}
+lr = 10**(-4)
+optimizer = torch.optim.Adam(params = model1.parameters(), lr = lr)
+loss = nn.MSELoss()
+{% endhighlight %}
+I chose `torch.optim.Adam()` as the optimizer due to its well documented advantages, specifically for non-stationary data. Since this problem is a regression problem, I decided that mean square error was the most appropriate. I came to a learning rate of 10**(-4) after tinkering around with the models on the perturbed sine wave.  I'm planning implementing a cross validation to rigorously determine the best rate, as mentioned earlier.  
+
+#### Training and Testing
+
+I used the same training and testing loops for both models.  Here's the code for both across one full pass (epoch) through the training/testing sets.
+
+{% highlight python %}
+def train(training_data, model, loss, optimizer):
+    # training for one epoch
+    model.train()
+    total = 0
+    actuals = []
+    pred = []
+    for i, batch in enumerate(training_data):
+        X,y = batch
+        # X = X.permute(1,0,2) do this if batch_first = False
+        X,y = X.to(device), y.to(device)
+        output = model(X)
+        ls = loss(output, y)
+
+        optimizer.zero_grad()
+        ls.backward()
+        optimizer.step()
+        total += ls.item()  
+
+        actuals.append(y)
+        pred.append(output)
+
+    mean_loss = total/len(training_data)
+    print(f"Average training loss is {mean_loss}")
+
+    return actuals, pred, mean_loss
+
+def test(testing_data, model, loss):
+    # testing for one epoch
+    model.eval()
+    actuals, pred = [], []
+    total = 0
+
+    with torch.no_grad():
+        for i, batch in enumerate(testing_data):
+            X,y = batch
+            # X = X.permute(1,0,2) do this if batch_first = False
+            X,y = X.to(device), y.to(device)
+            output = model(X)
+            ls = loss(output, y)
+            actuals.append(y[0].cpu().detach().numpy())
+            pred.append(output[0].cpu().detach().numpy())
+
+            total += ls.item()
+
+    mean_loss = total/len(testing_data)
+    print(f"Average testing loss is {mean_loss}")
+    return actuals, pred, mean_loss
 {% endhighlight %}
 
+I also implemented early stopping to prevent overfitting.  When average validation error increased, I stopped training and saved the model binary.  
 
+For both the perturbed sine wave and Idaho data, I used a 80/20 training testing split and each model was trained on the same training and testing data.  
+
+### Results
+
+#### Simple MLP
+The following graphs show the performance of the MLP on the perturbed sine wave in the validation set. 
+<img src="/assets/img/capstone_post/sine/preds_vs_vals_mlp.png">
+It's apparent that the model converges quickly, in only 4 epochs.  In addition, the early stopping procedure seems to be working since the model is picking up on the true sine wave relationship, not the random noise injected into it.  Here's a look at some graphs that plot the epochs vs. loss.  
+<img src="/assets/img/capstone_post/sine/epoch_vs_loss_mlp.png">
+Based on the performance, the model architecture was a decent candidate to train on the Idaho data.  When I applied this model on the Idaho data, it took many more epochs to converge, as expected.  In total, it took 46 full passes before the validation error increased.  Here's a look at the model performance on the validation set.
+<img src="/assets/img/capstone_post/idaho/preds_vs_vals_mlp.png">
+The best validation error achieved was 0.0005, and again, the model converges relatively quickly before it starts overfitting.  Note that the best error rate may be a bit misleading since I performed a MinMax scaling on the original data.  It would be more accurate to think of this in terms of percentages.  Essentially, the model is off by about 0.5% relative to the size of the capital call.  Since the capital calls are sometimes in the tens of millions, at worst, the model can predict the value of the capital call &plusmn; $100,000.  Here is a look at the epochs vs. loss plot
+<img src="/assets/img/capstone_post/idaho/epoch_vs_loss_mlp.png">
+The models seems to be working, achieving a decent mix of accuracy and speed.  
+
+#### LSTM RNN
+On the other hand, the LSTM RNN model took many epochs to train, but achieved better accuracy.  
+<img src="/assets/img/capstone_post/sine/preds_vs_vals_lstm.png">
+The graph above shows the model's results after the first 5 epochs. It took only 12 epochs to converge which is about 3 times as long as the MLP. However, there performance was slighly better, as the predictions nearly overlay the true sine wave. This suggests that the recurrent architecture captures the periodic trends within the data which boded well for the Idaho data.  
+
+When applied to the Idaho data, the same trend emerged: longer training better accuracy.  
+<img src="/assets/img/capstone_post/idaho/preds_vs_vals_lstm.png">
+Again, it took a bit over 
 
