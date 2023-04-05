@@ -13,7 +13,7 @@ Because these institutional investors are committing tons of money, the PE/VC fi
 
 The pension fund is now posed with a problem: What to do with the committed capital?  If they just hold the total amount of their commitment in cash, then they'll be missing out on returns and suppressing their IRR.  If they invest too much of their committed capital and can't come up with the cash when a capital call comes, then they'll be subject to some penalty specified by the fund terms.  A potentially lucrative deal could even fall through.  
 
-This is where our project fills in a gap.  Our group built and tested a suite of models to try and predict the amounts of capital calls based on historical data.  Originally, we spent our time trying to find correlations between market data, like S&P500 levels, and capital calls.  Long story short, that didn't pan out, and we were forced to pivot to a different idea.  We still managed to get some decent models, and I'll be focusing on those that I created.    
+This is where our project fills in a gap.  Our group built and tested a suite of models to try and predict the amounts of capital calls based on historical data.  I'll be focusing on those that I created.    
 
 ### Data and Cleaning
 
@@ -42,7 +42,7 @@ Inputs to the models were fed in sequences of 4, fund by fund.  The predictors f
 where 0.0455, the first value of Paid In Capital, is repeated twice to pad the input sequence and 0.0895 is the target value. 
 
 
-For the perturbed sine wave test, the models were provided with the x values and previous (lagged) values of the perturbed sine wave.  I used the following customized data sets to feed the models.  I utilized the `SequenceData` structure found at [this resource](https://www.crosstab.io/articles/time-series-pytorch-lstm/#data) and then utilized it to construct the Idaho data set so that the data did not overlap across funds. 
+For the perturbed sine wave test, the models were provided with the x values and previous (lagged) values of the perturbed sine wave.  I used the following customized data sets to feed the models.  I utilized the `SequenceData` structure found at [this resource](https://www.crosstab.io/articles/time-series-pytorch-lstm/#data) for the sine and Idaho data set. The `IdahoData` was constructed so there would be no overlap of data across funds.
 
 {% highlight python %}
 
@@ -294,11 +294,10 @@ The following graphs show the performance of the MLP on the perturbed sine wave 
 <img src="/assets/img/capstone_post/sine/preds_vs_vals_mlp.png">
 It's apparent that the model converges quickly, in only 4 epochs.  In addition, the early stopping procedure seems to be working since the model is picking up on the true sine wave relationship, not the random noise injected into it.  Here's a look at some graphs that plot the epochs vs. loss.  
 <img src="/assets/img/capstone_post/sine/epoch_vs_loss_mlp.png">
-Based on the performance, the model architecture was a decent candidate to train on the Idaho data.  When I applied this model on the Idaho data, it took many more epochs to converge, as expected.  In total, it took 46 full passes before the validation error increased.  Here's a look at the model performance on the validation set.
+Based on the performance, the model architecture was a decent candidate to train on the Idaho data.  When I applied this model on the Idaho data, it took only 4 epochs to converge.  Here's a look at the model performance on the validation set.
 <img src="/assets/img/capstone_post/idaho/preds_vs_vals_mlp.png">
 The best validation error achieved was 0.0005, and again, the model converges relatively quickly before it starts overfitting.  Note that the best error rate may be a bit misleading since I performed a MinMax scaling on the original data.  It would be more accurate to think of this in terms of percentages.  Essentially, the model is off by about 0.5% relative to the size of the capital call.  Since the capital calls are sometimes in the tens of millions, at worst, the model can predict the value of the capital call &plusmn; $100,000.  Here is a look at the epochs vs. loss plot
 <img src="/assets/img/capstone_post/idaho/epoch_vs_loss_mlp.png">
-The models seems to be working, achieving a decent mix of accuracy and speed.  
 
 #### LSTM RNN
 On the other hand, the LSTM RNN model took many epochs to train, but achieved better accuracy.  
@@ -316,4 +315,6 @@ Overall, the models are performing well in the framework that was constructed fo
 
 If the first assumption is true, then incorporating other market variables into the set of predictors may increase model performance.  To pursue this route, we would ideally have data at a higher granularity than the quarter level and much more data over time.  On the other hand, if there are truly some "leaders" amongs the funds, then a model that takes advantage of leading indicators may be a good way to forecast demand.  Traditionally, these types of models are used in demand forecasting and supply chain operations, but with our current data, it may be possible to test this hypothesis.  
 
-Given our constraints on data, the second hypthesis deserves further exploration.  Thanks for reading this article and feel free to reach out at the contact information in the footer to discuss more!
+Given our constraints on data, the second hypthesis deserves further exploration.  I also plan on using cross validation to optimize the hyperparameters for the original models.  The hyperparameters that I used were chosen with a bit of tinkering and a more robust procedure is necessary to ensure that everything is optimal.
+
+Thanks for reading this article and feel free to reach out at the contact information in the footer to discuss more!
