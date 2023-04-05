@@ -13,7 +13,7 @@ Because these institutional investors are committing tons of money, the PE/VC fi
 
 The pension fund is now posed with a problem: What to do with the committed capital?  If they just hold the total amount of their commitment in cash, then they'll be missing out on returns and suppressing their IRR.  If they invest too much of their committed capital and can't come up with the cash when a capital call comes, then they'll be subject to some penalty specified by the fund terms.  A potentially lucrative deal could even fall through.  
 
-This is where our project fills in a gap.  Our group built and tested a suite of models to try and predict the amounts of capital calls based on historical data.  Originally, we spent our time trying to find correlations between market data, like S&P500 levels, and capital calls.  Long story short, that didn't pan out, and we were forced to pivot to a different idea.  We still managed to get some decent models, and I'll be focusing on those that I created.    
+This is where our project fills in a gap.  Our group built and tested a suite of models to try and predict the amounts of capital calls based on historical data.  I'll be focusing on those that I created.    
 
 ### Data and Cleaning
 
