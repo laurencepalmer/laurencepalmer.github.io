@@ -307,5 +307,12 @@ The graph above shows the model's results after the first 5 epochs. It took only
 
 When applied to the Idaho data, the same trend emerged: longer training better accuracy.  
 <img src="/assets/img/capstone_post/idaho/preds_vs_vals_lstm.png">
-Again, it took a bit over 
+Again, it took much longer to train this model compared to the MLP with the modeling converging on epoch 46.  However, the accuracy is about twice as good with the an error of 0.2% compared to the MLP model. 
 
+### Conclusions
+Overall, the models are performing well in the framework that was constructed for them.  When training on the the capital demands for other funds, they are able to predict the sequence of capital demands for other funds.  This might suggest a few things:
+- There are market conditions that each fund is responding to and they have similar investment strategies that cause them to generally require capital at similar times
+- Some funds may act as "leaders."  For example, KKR may be especially active in a quarter which compels other funds to make more transactions as well.  These types of "leader" funds could have been in the training set, and hence the model is basing its predictions from those funds. 
+If the first assumption is true, then incorporating other market variables into the set of predictors may increase model performance.  To pursue this route, we would ideally have data at a higher granularity than the quarter level and much more data over time.  On the other hand, if there are truly some "leaders" amongs the funds, then a model that takes advantage of leading indicators may be a good way to forecast demand.  Traditionally, these types of models are used in demand forecasting and supply chain operations, but with our current data, it may be possible to test this hypothesis.  
+
+Given our constraints on data, the second hypthesis deserves further exploration.  Thanks for reading this article and feel free to reach out at the contact information in the footer to discuss more!
