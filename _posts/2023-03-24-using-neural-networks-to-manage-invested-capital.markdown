@@ -318,3 +318,5 @@ If the first assumption is true, then incorporating other market variables into 
 Given our constraints on data, the second hypthesis deserves further exploration.  I also plan on using cross validation to optimize the hyperparameters for the original models.  The hyperparameters that I used were chosen with a bit of tinkering and a more robust procedure is necessary to ensure that everything is optimal.
 
 Thanks for reading this article and feel free to reach out at the contact information in the footer to discuss more!
+
+For the notebooks and data for these models, you can go to this [link](https://github.com/laurencepalmer/capstone_models).
