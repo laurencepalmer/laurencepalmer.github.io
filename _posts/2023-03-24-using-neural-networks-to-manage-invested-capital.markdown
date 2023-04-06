@@ -296,7 +296,7 @@ It's apparent that the model converges quickly, in only 4 epochs.  In addition, 
 <img src="/assets/img/capstone_post/sine/epoch_vs_loss_mlp.png">
 Based on the performance, the model architecture was a decent candidate to train on the Idaho data.  When I applied this model on the Idaho data, it took only 4 epochs to converge.  Here's a look at the model performance on the validation set.
 <img src="/assets/img/capstone_post/idaho/preds_vs_vals_mlp.png">
-The best validation error achieved was 0.0005, and again, the model converges relatively quickly before it starts overfitting.  Note that the best error rate may be a bit misleading since I performed a MinMax scaling on the original data.  It would be more accurate to think of this in terms of percentages.  Essentially, the model is off by about 0.5% relative to the size of the capital call.  Since the capital calls are sometimes in the tens of millions, at worst, the model can predict the value of the capital call &plusmn; $100,000.  Here is a look at the epochs vs. loss plot
+The best validation error achieved was 0.0005, and again, the model converges relatively quickly before it starts overfitting.  Note that the best error rate may be a bit misleading since I performed a MinMax scaling on the original data.  It would be more accurate to think of this in terms of percentages.  Essentially, the model is off by about 0.05% relative to the size of the capital call.  Since the capital calls are sometimes in the tens of millions, at worst, the model can predict the value of the capital call &plusmn; $10,000.  Here is a look at the epochs vs. loss plot
 <img src="/assets/img/capstone_post/idaho/epoch_vs_loss_mlp.png">
 
 #### LSTM RNN
@@ -306,7 +306,7 @@ The graph above shows the model's results after the first 5 epochs. It took only
 
 When applied to the Idaho data, the same trend emerged: longer training better accuracy.  
 <img src="/assets/img/capstone_post/idaho/preds_vs_vals_lstm.png">
-Again, it took much longer to train this model compared to the MLP with the modeling converging on epoch 46.  However, the accuracy is about twice as good with the an error of 0.2% compared to the MLP model. 
+Again, it took much longer to train this model compared to the MLP with the modeling converging on epoch 46.  However, the accuracy is about twice as good with the an error of 0.02% compared to the MLP model. 
 
 ### Conclusions
 Overall, the models are performing well in the framework that was constructed for them.  When training on the the capital demands for other funds, they are able to predict the sequence of capital demands for other funds.  This might suggest a few things:
