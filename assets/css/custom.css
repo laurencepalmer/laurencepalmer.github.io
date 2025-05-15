@@ -1,0 +1,135 @@
+body {
+  background: #0a2342;
+  color: #fff;
+}
+
+/* Layout container */
+.layout-container {
+  display: flex;
+  min-height: 100vh;
+  background: #0a2342;
+}
+
+/* Sidebar styles */
+.sidebar {
+  width: 300px;
+  position: fixed;
+  height: 100vh;
+  background-color: #102c54;
+  padding: 2rem;
+  border-right: 1px solid #183661;
+  overflow-y: auto;
+  color: #fff;
+}
+
+.personal-info h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.personal-info .email {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.personal-info .description {
+  margin-bottom: 2rem;
+}
+
+.personal-info .social-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.personal-info .social-links a {
+  color: #fff;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.personal-info .social-links a:hover {
+  color: #4f8cff;
+  text-decoration: underline;
+}
+
+.personal-info .social-links i {
+  color: #4f8cff;
+  margin-right: 0.5em;
+}
+
+/* Main content area */
+.page-content {
+  flex: 1;
+  margin-left: 300px; /* Same as sidebar width */
+  padding: 2rem;
+  background: #0a2342;
+  color: #fff;
+}
+
+h1, h2, h3, h4, h5, h6, p, li, span, a, div {
+  color: #fff !important;
+}
+
+.post-meta {
+  color: #b0c4de !important;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+  .layout-container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #183661;
+  }
+
+  .page-content {
+    margin-left: 0;
+  }
+}
+
+.profile-pic {
+  display: block;
+  margin: 0 auto 1.5rem auto;
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #183661;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+.personal-info {
+  text-align: center;
+  color: #fff;
+}
+
+.personal-info .social-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+pre, code, pre code {
+  background: #111a2f !important;
+  color: #e0e6f6;
+  border-radius: 6px;
+}
+
+pre {
+  padding: 1em;
+  overflow-x: auto;
+}
+
+code {
+  padding: 0.2em 0.4em;
+  font-size: 95%;
+  border-radius: 6px;
+}
