@@ -1,0 +1,126 @@
+/**
+ * Dark Theme Syntax Highlighting styles
+ */
+.highlight, .highlighter-rouge {
+  background: #111a2f !important;
+  color: #e0e6f6;
+  border-radius: 6px;
+  padding: 1em;
+  overflow-x: auto;
+}
+
+// Comments
+.highlight .c, .highlighter-rouge .c,
+.highlight .cm, .highlighter-rouge .cm,
+.highlight .c1, .highlighter-rouge .c1 {
+  color: #6272a4; // soft purple
+  font-style: italic;
+}
+
+// Keywords
+.highlight .k, .highlighter-rouge .k,
+.highlight .kc, .highlighter-rouge .kc,
+.highlight .kd, .highlighter-rouge .kd,
+.highlight .kp, .highlighter-rouge .kp,
+.highlight .kr, .highlighter-rouge .kr,
+.highlight .kt, .highlighter-rouge .kt {
+  color: #ffb86c; // orange
+  font-weight: bold;
+}
+
+// Operators
+.highlight .o, .highlighter-rouge .o,
+.highlight .ow, .highlighter-rouge .ow {
+  color: #8be9fd; // cyan
+  font-weight: bold;
+}
+
+// Strings
+.highlight .s, .highlighter-rouge .s,
+.highlight .sb, .highlighter-rouge .sb,
+.highlight .sc, .highlighter-rouge .sc,
+.highlight .sd, .highlighter-rouge .sd,
+.highlight .s2, .highlighter-rouge .s2,
+.highlight .se, .highlighter-rouge .se,
+.highlight .sh, .highlighter-rouge .sh,
+.highlight .si, .highlighter-rouge .si,
+.highlight .sx, .highlighter-rouge .sx,
+.highlight .sr, .highlighter-rouge .sr,
+.highlight .s1, .highlighter-rouge .s1,
+.highlight .ss, .highlighter-rouge .ss {
+  color: #f1fa8c; // yellow
+}
+
+// Numbers
+.highlight .m, .highlighter-rouge .m,
+.highlight .mf, .highlighter-rouge .mf,
+.highlight .mh, .highlighter-rouge .mh,
+.highlight .mi, .highlighter-rouge .mi,
+.highlight .mo, .highlighter-rouge .mo,
+.highlight .il, .highlighter-rouge .il {
+  color: #bd93f9; // purple
+}
+
+// Builtins, Functions, Classes
+.highlight .nb, .highlighter-rouge .nb,
+.highlight .bp, .highlighter-rouge .bp {
+  color: #50fa7b; // green
+}
+.highlight .nc, .highlighter-rouge .nc,
+.highlight .no, .highlighter-rouge .no,
+.highlight .nd, .highlighter-rouge .nd,
+.highlight .ne, .highlighter-rouge .ne,
+.highlight .nf, .highlighter-rouge .nf {
+  color: #50fa7b; // green
+  font-weight: bold;
+}
+
+// Variables
+.highlight .nv, .highlighter-rouge .nv,
+.highlight .vc, .highlighter-rouge .vc,
+.highlight .vg, .highlighter-rouge .vg,
+.highlight .vi, .highlighter-rouge .vi {
+  color: #f8f8f2; // near white
+}
+
+// Tags, Attributes
+.highlight .nt, .highlighter-rouge .nt {
+  color: #ff79c6; // pink
+}
+.highlight .na, .highlighter-rouge .na {
+  color: #8be9fd; // cyan
+}
+
+// Error
+.highlight .err, .highlighter-rouge .err {
+  color: #ff5555; // red
+  background-color: #2a1a1a;
+}
+
+// Generic
+.highlight .gh, .highlighter-rouge .gh {
+  color: #f8f8f2;
+  font-weight: bold;
+}
+.highlight .gp, .highlighter-rouge .gp {
+  color: #bd93f9;
+}
+.highlight .gs, .highlighter-rouge .gs {
+  font-weight: bold;
+}
+.highlight .gu, .highlighter-rouge .gu {
+  color: #8be9fd;
+}
+.highlight .gt, .highlighter-rouge .gt {
+  color: #ff5555;
+}
+
+// Whitespace
+.highlight .w, .highlighter-rouge .w {
+  color: #44475a;
+}
+
+// Default text
+.highlight .n, .highlighter-rouge .n {
+  color: #e0e6f6;
+}
