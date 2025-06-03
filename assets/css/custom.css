@@ -8,6 +8,7 @@ body {
   display: flex;
   min-height: 100vh;
   background: #0a2342;
+  padding-left: 400px; /* Add padding to account for fixed sidebar */
 }
 
 /* Sidebar styles */
@@ -20,6 +21,9 @@ body {
   border-right: 1px solid #183661;
   overflow-y: auto;
   color: #fff;
+  left: 0;
+  top: 0;
+  z-index: 1;
 }
 
 .personal-info h1 {
@@ -61,10 +65,10 @@ body {
 /* Main content area */
 .page-content {
   flex: 1;
-  margin-left: 300px; /* Same as sidebar width */
   padding: 2rem;
   background: #0a2342;
   color: #fff;
+  width: 100%;
 }
 
 h1, h2, h3, h4, h5, h6, p, li, span, a, div {
@@ -79,6 +83,7 @@ h1, h2, h3, h4, h5, h6, p, li, span, a, div {
 @media screen and (max-width: 768px) {
   .layout-container {
     flex-direction: column;
+    padding-left: 0;
   }
 
   .sidebar {
@@ -91,6 +96,41 @@ h1, h2, h3, h4, h5, h6, p, li, span, a, div {
 
   .page-content {
     margin-left: 0;
+    width: 100%;
+  }
+
+  .profile-pic {
+    width: 150px;
+    height: 150px;
+  }
+
+  .personal-info {
+    padding: 1rem;
+  }
+
+  .personal-info h1 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Add a hamburger menu button for mobile */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1001;
+  background: #102c54;
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+@media screen and (max-width: 768px) {
+  .menu-toggle {
+    display: block;
   }
 }
 
