@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "Blind Video Quality Monitoring at Scale"
-date:   2025-05-20 01:08:51 +0000
+title:  "Blind Video Quality Monitoring at Scale Funded by Amazon Prime"
+date:   2025-08-08 01:08:51 +0000
 categories: [publication, jekyll update]
 ---
 
