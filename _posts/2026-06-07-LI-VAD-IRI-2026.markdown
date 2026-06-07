@@ -1,0 +1,8 @@
+---
+layout: post
+title:  "LI-VAD Accepted to IEEE IRI 2026"
+date:   2026-06-07 01:08:51 +0000
+categories: [publication, jekyll update]
+---
+
+Happy to announce that our paper on LI-VAD has been accepted to IEEE IRI 2026!
