@@ -7,7 +7,7 @@ permalink: /
 ---
 <h1>About Me</h1>
 
-I'm an MS student in the computer science department at the University of Southern California. Previously, I was 
+I'm a PhD student in the electrical and computer engineering department at the University of Southern California. Previously, I was
 at UC Berkeley (M.Eng Industrial Engineering and Ops Research) and UC Santa Barbara (B.S. Applied Math, B.A. Economics). I've worked 
 at a few places in between academic stops including [Veryfi](https://www.veryfi.com), [Shelton AI](https://www.sheltonai.com/), and [Emendata](https://www.emendatallc.com/). The Shelton AI [capstone project](https://medium.com/berkeley-fung-institute/combining-superlative-ai-research-with-berkeleys-next-unicorn-ecaa1ee958a1) was concurrent with my time at Berkeley. 
 
